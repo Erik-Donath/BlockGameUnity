@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public static class VoxelData {
@@ -10,7 +9,7 @@ public static class VoxelData {
     // Y+ => Up
     // Y- => Down
 
-    public static readonly Vector3[] vertices = new Vector3[8] {
+    public static readonly Vector3[] Vertices = new Vector3[8] {
         new Vector3(0, 0, 0), // 0
         new Vector3(1, 0, 0), // 1
         new Vector3(0, 1, 0), // 2
@@ -21,7 +20,7 @@ public static class VoxelData {
         new Vector3(1, 1, 1), // 7
     };
 
-    public static readonly int[,] indeces = new int[6, 4] {
+    public static readonly int[,] Indeces = new int[6, 4] {
         { 5, 7, 4, 6 }, // North
         { 0, 2, 1, 3 }, // South
 
@@ -32,11 +31,11 @@ public static class VoxelData {
         { 1, 5, 0, 4 }, // Down
     };
 
-    public static readonly int[] arrayOrder = new int[6] {
+    public static readonly int[] ArrayOrder = new int[6] {
         0, 1, 2, 2, 1, 3
     };
 
-    public static readonly Vector3Int[] inDirection = new Vector3Int[6] {
+    public static readonly Vector3Int[] InDirection = new Vector3Int[6] {
         new Vector3Int(0, 0, +1), // North
         new Vector3Int(0, 0, -1), // South
 
@@ -57,20 +56,24 @@ public enum FaceDirection: int {
     Down  = 5,
 }
 
-public struct VoxelFace {
-    public readonly Vector3Int pos;
-    public readonly FaceDirection dir;
-    public readonly Vector4 uv;
+public readonly struct VoxelFace {
+    public readonly Vector3Int Position;
+    public readonly FaceDirection Direction;
+    public readonly Vector4 UV;
 
     public VoxelFace(Vector3Int pos, FaceDirection direction, Vector4 uv) {
-        this.pos = pos;
-        this.dir = direction;
-        this.uv = uv;
+        this.Position = pos;
+        this.Direction = direction;
+        this.UV = uv;
     }
 }
 
 public class VoxelMesh {
     private List<VoxelFace> faces = new List<VoxelFace>();
+    public void ClearMesh()
+    {
+        faces.Clear();
+    }
 
     public void AddFace(VoxelFace face) {
         faces.Add(face);
@@ -79,8 +82,11 @@ public class VoxelMesh {
         faces.Add(new VoxelFace(pos, direction, uv));
     }
 
-    public void ClearMesh() {
-        faces.Clear();
+    public void SetFaces(List<VoxelFace> faces) {
+        this.faces = faces;
+    }
+    public List<VoxelFace> GetFaces() {
+        return faces;
     }
 
     public Mesh GenerateMesh() {
@@ -94,18 +100,18 @@ public class VoxelMesh {
             int triangleIndex = i * 6;
 
             for(int j = 0; j < 4; j++) {
-                int index = VoxelData.indeces[(int)face.dir, j];
-                vertices[vertexIndex + j] = VoxelData.vertices[index] + face.pos;
+                int index = VoxelData.Indeces[(int)face.Direction, j];
+                vertices[vertexIndex + j] = VoxelData.Vertices[index] + face.Position;
             }
 
-            Vector4 uv = face.uv;
+            Vector4 uv = face.UV;
             uvs[vertexIndex + 0] = new Vector2(uv.x,      uv.y);
             uvs[vertexIndex + 1] = new Vector2(uv.x,      uv.y+uv.w);
             uvs[vertexIndex + 2] = new Vector2(uv.x+uv.z, uv.y);
             uvs[vertexIndex + 3] = new Vector2(uv.x+uv.z, uv.y+uv.w);
             
             for(int j = 0; j < 6; j++) {
-                int order = VoxelData.arrayOrder[j];
+                int order = VoxelData.ArrayOrder[j];
                 indeces[triangleIndex + j] = vertexIndex + order;
             }
         }
@@ -113,13 +119,13 @@ public class VoxelMesh {
         Mesh mesh = new Mesh();
         mesh.name = "Chunk Mesh";
 
-        mesh.vertices = vertices.ToArray();
-        mesh.triangles = indeces.ToArray();
-        mesh.uv = uvs.ToArray();
+        mesh.vertices  = vertices;
+        mesh.uv        = uvs;
+        mesh.triangles = indeces;
 
-        mesh.RecalculateBounds();
+        //mesh.RecalculateBounds();
         mesh.RecalculateNormals();
-        mesh.RecalculateTangents();
+        //mesh.RecalculateTangents();
 
         return mesh;
     }
