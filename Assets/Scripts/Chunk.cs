@@ -1,73 +1,61 @@
-using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
 public class Chunk : MonoBehaviour {
-    private readonly Vector3[] voxelVertices = new Vector3[8] {
-        new Vector3(0.0f, 0.0f, 0.0f), // 0
-        new Vector3(1.0f, 0.0f, 0.0f), // 1
-        new Vector3(1.0f, 1.0f, 0.0f), // 2
-        new Vector3(0.0f, 1.0f, 0.0f), // 3
-        new Vector3(0.0f, 0.0f, 1.0f), // 4
-        new Vector3(1.0f, 0.0f, 1.0f), // 5
-        new Vector3(1.0f, 1.0f, 1.0f), // 6
-        new Vector3(0.0f, 1.0f, 1.0f), // 7
-    };
-
-    private readonly int[,] voxelIndeces = new int[6, 6] {
-        { 0, 3, 1, 1, 3, 2 }, // Back
-        { 5, 6, 4, 4, 6, 7 }, // Front
-        { 3, 7, 2, 2, 7, 6 }, // Top
-        { 1, 5, 0, 0, 5, 4 }, // Bottom
-        { 4, 7, 0, 0, 7, 3 }, // Left
-        { 1, 2, 5, 5, 2, 6 }, // Right
-    };
-
-    private readonly Vector2[] voxelUvs = new Vector2[6] {
-        new Vector2(0.0f, 0.0f), // 0
-        new Vector2(0.0f, 1.0f), // 1
-        new Vector2(1.0f, 0.0f), // 2
-        new Vector2(1.0f, 0.0f), // 3
-        new Vector2(0.0f, 1.0f), // 4
-        new Vector2(1.0f, 1.0f), // 5
-    };
-
     [SerializeField] private Material worldMaterial;
-
 
     private MeshFilter m_filter;
     private MeshRenderer m_renderer;
+
+    private List<Vector3> vertices = new List<Vector3>();
+    private List<Vector2> uvs = new List<Vector2>();
+    private List<int> indeces = new List<int>();
+    private int triangleIndex = 0;
 
     private void Start() {
         m_filter = this.AddComponent<MeshFilter>();
         m_renderer = this.AddComponent<MeshRenderer>();
         m_renderer.sharedMaterial = worldMaterial;
 
-        CreateMesh();
+        GenerateMesh();
     }
 
-    private void Update() {
-        
-    }
+    private void GenerateMesh() {
+        ClearMesh();
 
-    private void CreateMesh() {
-        List<Vector3> vertices = new List<Vector3>();
-        List<Vector2> uvs = new List<Vector2>();
-        List<int> indeces = new List<int>();
-
-        // Create Mesh
-        for(int j = 0; j < 6; j++) {
-            for(int i = 0; i < 6; i++) {
-                int index = voxelIndeces[j, i];
-                vertices.Add(voxelVertices[index]);
-                uvs.Add(voxelUvs[i]);
-                indeces.Add(j * 6 + i);
+        for (int a = 0; a < 5; a++) {
+            for (int b = 0; b < 5; b++) {
+                for (int c = 0; c < 5; c++) {
+                    AddVoxel(new Vector3(a, b, c));
+                }
             }
         }
+        SendMesh();
+    }
+
+    private void AddVoxel(Vector3 position) {
+        for(int j = 0; j < 6; j++) {
+            for(int i = 0; i < 6; i++) {
+                int index = VoxelData.voxelIndeces[j, i];
+                vertices.Add(position + VoxelData.voxelVertices[index]);
+                uvs.Add(VoxelData.voxelUvs[i]);
+
+                indeces.Add(i + triangleIndex);
+            }
+            triangleIndex += 6;
+        }
+    }
+
+    private void ClearMesh() {
+        vertices.Clear();
+        uvs.Clear();
+        indeces.Clear();
+        triangleIndex = 0;
+    }
 
 
-        // Send Mesh to Unity
+    private void SendMesh() {
         Mesh mesh = new Mesh();
         mesh.vertices = vertices.ToArray();
         mesh.triangles = indeces.ToArray();
@@ -77,6 +65,7 @@ public class Chunk : MonoBehaviour {
         mesh.RecalculateNormals();
         mesh.RecalculateTangents();
 
+        mesh.name = "Chunk Mesh - " + transform.position.x + ", " + transform.position.y;
         m_filter.mesh = mesh;
     }
 }
