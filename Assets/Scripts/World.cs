@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 using UnityEngine;
 
 public class World : MonoBehaviour {
@@ -13,12 +15,16 @@ public class World : MonoBehaviour {
 
     private void Start() {
         instance = this;
-
-        chunk = new Chunk(new Vector2Int(0, 0));
-        chunk.GameObject.transform.SetParent(transform, false);
-        chunk.GenerateMesh();
+        CreateChunk(new Vector3Int(0, 0, 0));
     }
 
-    private Chunk chunk;
+    private void CreateChunk(Vector3Int coord) {
+        Chunk chunk = new Chunk(coord);
+        chunk.GameObject.transform.SetParent(transform, false);
+        chunk.GenerateMesh();
+        chunks.Add(chunk);
+    }
+
+    private List<Chunk> chunks = new List<Chunk>();
     private static World instance = null;
 }

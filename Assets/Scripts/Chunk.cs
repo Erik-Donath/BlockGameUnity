@@ -1,16 +1,23 @@
+using BlockData;
+
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class Chunk {
     public const int ChunkSize = 16;
     public GameObject GameObject {
         get => gameObject;
     }
+    public Vector3Int Coord {
+        get => new Vector3Int((int)gameObject.transform.position.x / ChunkSize, (int)gameObject.transform.position.y / ChunkSize, (int)gameObject.transform.position.z / ChunkSize);
+        set => gameObject.transform.position = value * ChunkSize;
+    }
 
-    public Chunk(Vector2Int pos) {
+    public Chunk(Vector3Int pos) {
         gameObject = new GameObject();
-        gameObject.transform.position = new Vector3Int(pos.x, 0, pos.y) * ChunkSize;
-        gameObject.name = "Chunk " + pos.x + ", " + pos.y;
-        
+        gameObject.name = "Chunk " + pos.x + ", " + pos.y + ", " + pos.z;
+        Coord = pos;
+
         filter = gameObject.AddComponent<MeshFilter>();
         MeshRenderer renderer = gameObject.AddComponent<MeshRenderer>();
         renderer.sharedMaterial = World.Instance.Material;
@@ -18,14 +25,15 @@ public class Chunk {
         for(int i = 0; i < blocks.GetLength(0); i++) {
             for(int j = 0; j < blocks.GetLength(1); j++) {
                 for(int k = 0; k < blocks.GetLength(2); k++) {
-                    blocks[i, j, k] = (i + j + k) % 2 == 0;
+                    blocks[i, j, k] = (byte)((i + j + k) % Block.Blocks.Length);
                 }
             }
         }
     }
 
     ~Chunk() {
-        Object.Destroy(gameObject, 0.0f);
+        gameObject.SetActive(false);
+        Object.Destroy(gameObject);
     }
 
     public void GenerateMesh() {
@@ -34,8 +42,10 @@ public class Chunk {
         for (int i = 0; i < blocks.GetLength(0); i++) {
             for (int j = 0; j < blocks.GetLength(1); j++) {
                 for (int k = 0; k < blocks.GetLength(2); k++) {
-                    if (IsSolid(new Vector3Int(i, j, k))) {
-                        AddVoxel(new Vector3Int(i, j, k));
+                    byte block = blocks[i, j, k];
+
+                    if(block != 0 && block < Block.Blocks.Length) {
+                        AddBlockFaces(new Vector3Int(i, j, k), block);
                     }
                 }
             }
@@ -44,12 +54,28 @@ public class Chunk {
         filter.mesh = voxelMesh.GenerateMesh();
     }
 
-    private void AddVoxel(Vector3Int position) {
-        for(int j = 0; j < 6; j++) {
-            if (!IsSolid(position + VoxelData.InDirection[j])) {
-                voxelMesh.AddFace(position, (FaceDirection)j, new Vector4(0, 0, 1, 1));
-            }
+    private void AddBlockFaces(Vector3Int position, byte block) {
+        IModel model = Block.Blocks[block].States.DefaultModel;
+
+        if(model.IsPrimitv) {
+            VoxelModel vmodel = (VoxelModel)model;
+
+            BlockNabours nabours = GetNaboursDetails(position);
+            voxelMesh.AddFaces(vmodel.GetFaces(position, nabours));
         }
+        else throw new System.NotImplementedException("Nur primitve(voxel) blöcke sind unterstützt.");
+    }
+
+    private BlockData.BlockNabours GetNaboursDetails(Vector3Int pos) {
+        if( pos.x < 0 || pos.x >= blocks.GetLength(0) ||
+            pos.y < 0 || pos.y >= blocks.GetLength(1) ||
+            pos.z < 0 || pos.z >= blocks.GetLength(2)
+        ) return new BlockData.BlockNabours();
+
+        bool[] solids = new bool[6];
+        for(int i = 0; i < 6; i++)
+            solids[i] = IsSolid(pos + VoxelData.InDirection[i]);
+        return new BlockData.BlockNabours(solids);
     }
 
     private bool IsSolid(Vector3Int pos) {
@@ -58,12 +84,12 @@ public class Chunk {
             pos.z < 0 || pos.z >= blocks.GetLength(2)
         )
             return false;
-        return blocks[pos.x, pos.y, pos.z];
+        return Block.Blocks[blocks[pos.x, pos.y, pos.z]].Solid;
     }
 
     private GameObject gameObject;
     private MeshFilter filter;
 
     private VoxelMesh voxelMesh = new VoxelMesh();
-    private bool[,,] blocks = new bool[16, 16, 16];
+    private byte[,,] blocks = new byte[ChunkSize, ChunkSize, ChunkSize];
 }

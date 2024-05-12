@@ -363,7 +363,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1bdfb030fef5cdc49b1099a415190a65, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  material: {fileID: 2100000, guid: 13684dcd755592541acad677727c729f, type: 2}
+  material: {fileID: 15303, guid: 0000000000000000f000000000000000, type: 0}
   textures: []
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

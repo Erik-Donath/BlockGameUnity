@@ -1,5 +1,10 @@
 using System.Collections.Generic;
+
+using BlockData;
+
 using UnityEngine;
+
+using static VoxelData;
 
 public static class VoxelData {
     // X+ => East
@@ -45,15 +50,15 @@ public static class VoxelData {
         new Vector3Int(0, +1, 0), // Up
         new Vector3Int(0, -1, 0), // Down
     };
-}
 
-public enum FaceDirection: int {
-    North = 0,
-    South = 1,
-    West  = 2,
-    East  = 3,
-    Up    = 4,
-    Down  = 5,
+    public enum FaceDirection : int {
+        North = 0,
+        South = 1,
+        West = 2,
+        East = 3,
+        Up = 4,
+        Down = 5,
+    }
 }
 
 public readonly struct VoxelFace {
@@ -62,9 +67,76 @@ public readonly struct VoxelFace {
     public readonly Vector4 UV;
 
     public VoxelFace(Vector3Int pos, FaceDirection direction, Vector4 uv) {
-        this.Position = pos;
-        this.Direction = direction;
-        this.UV = uv;
+        Position = pos;
+        Direction = direction;
+        UV = uv;
+    }
+}
+
+public struct VoxelTextures {
+    public int North, South, West, East, Up, Down;
+
+    public int[] Textures {
+        get => new int[6] { North, South, West, East, Up, Down };
+        set {
+            North = value[0];
+            South = value[1];
+            West = value[2];
+            East = value[3];
+            Up = value[4];
+            Down = value[5];
+        }
+    }
+    public VoxelTextures(int[] textures) {
+        North = textures[0];
+        South = textures[1];
+        West = textures[2];
+        East = textures[3];
+        Up = textures[4];
+        Down = textures[5];
+    }
+    public VoxelTextures(int texture) {
+        North = texture;
+        South = texture;
+        West = texture;
+        East = texture;
+        Up = texture;
+        Down = texture;
+    }
+
+    public static Vector4[] TextureUVS {
+        get;
+    } = new Vector4[] {
+        new Vector4(0.0f, 0.0f, 0.0f, 0.0f),
+
+        new Vector4(0.0f, 0.0f, 0.5f, 0.5f),
+
+        new Vector4(0.5f, 0.0f, 1.0f, 0.5f),
+        new Vector4(0.0f, 0.5f, 0.5f, 1.0f),
+        new Vector4(0.5f, 0.5f, 1.0f, 1.0f),
+    };
+}
+
+public class VoxelModel : IModel {
+    public bool IsPrimitv => true;
+    public VoxelTextures Textures {
+        get; private set;
+    }
+
+    public VoxelModel(VoxelTextures textures) {
+        Textures = textures;
+    }
+
+    public List<VoxelFace> GetFaces(Vector3Int position, BlockNabours nabours) {
+        List<VoxelFace> faces = new List<VoxelFace>();
+        bool[] solids = nabours.Solids;
+        int[] textures = Textures.Textures;
+
+        for(int i = 0; i < 6; i++) {
+            if(!solids[i])
+                faces.Add(new VoxelFace(position, (FaceDirection)i, VoxelTextures.TextureUVS[textures[i]]));
+        }
+        return faces;
     }
 }
 
@@ -82,6 +154,9 @@ public class VoxelMesh {
         faces.Add(new VoxelFace(pos, direction, uv));
     }
 
+    public void AddFaces(List<VoxelFace> vfaces) {
+        faces.AddRange(vfaces);
+    }
     public void SetFaces(List<VoxelFace> faces) {
         this.faces = faces;
     }
@@ -105,10 +180,10 @@ public class VoxelMesh {
             }
 
             Vector4 uv = face.UV;
-            uvs[vertexIndex + 0] = new Vector2(uv.x,      uv.y);
-            uvs[vertexIndex + 1] = new Vector2(uv.x,      uv.y+uv.w);
-            uvs[vertexIndex + 2] = new Vector2(uv.x+uv.z, uv.y);
-            uvs[vertexIndex + 3] = new Vector2(uv.x+uv.z, uv.y+uv.w);
+            uvs[vertexIndex + 0] = new Vector2(uv.x, uv.y);
+            uvs[vertexIndex + 1] = new Vector2(uv.x, uv.w);
+            uvs[vertexIndex + 2] = new Vector2(uv.z, uv.y);
+            uvs[vertexIndex + 3] = new Vector2(uv.z, uv.w);
             
             for(int j = 0; j < 6; j++) {
                 int order = VoxelData.ArrayOrder[j];
