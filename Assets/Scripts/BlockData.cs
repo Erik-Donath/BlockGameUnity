@@ -92,14 +92,14 @@ namespace BlockData {
             int x = textureID % world.GetHorizontalTextureCount();
             int y = textureID / world.GetHorizontalTextureCount();
 
-            float width = texture.width / world.GetHorizontalTextureCount();
+            float width  = texture.width  / world.GetHorizontalTextureCount();
             float height = texture.height / world.GetVerticalTextureCount();
 
             Vector4 vec = new Vector4(
-                (width * x) / texture.width,
+                (width  * x) / texture.width,
                 (height * y) / texture.height,
-                (width * (x + 1)) / texture.width,
-                (height * (y + 1)) / texture.height
+                (width  * (x + 1.0f)) / texture.width,
+                (height * (y + 1.0f)) / texture.height
             );
             return vec;
         }

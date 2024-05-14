@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class World : MonoBehaviour {
-    [SerializeField] private Material  material;
+    [SerializeField] private Material material;
     [SerializeField] private int HorizontalTextureCount = 1; // x
-    [SerializeField] private int VerticalTextureCount = 1;   // y
+    [SerializeField] private int VerticalTextureCount   = 1; // y
 
     public int GetHorizontalTextureCount() {
         return HorizontalTextureCount;
@@ -23,12 +23,15 @@ public class World : MonoBehaviour {
 
     private void Start() {
         instance = this;
-        CreateChunk(new ChunkCoord(0,0,0));
+        for(int x = -10; x <= 10; x++) {
+            for(int y = -10; y <= 10; y++) {
+                CreateChunk(new ChunkCoord(x, 0, y));
+            }
+        }
     }
 
     private void CreateChunk(ChunkCoord coord) {
         Chunk chunk = new Chunk(coord);
-        //chunk.GameObject.transform.SetParent(transform, false);
         chunk.GenerateMesh();
         chunks.Add(chunk);
     }

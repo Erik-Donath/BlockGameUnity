@@ -1,5 +1,3 @@
-using BlockData;
-
 using UnityEngine;
 
 public struct ChunkCoord {
@@ -18,6 +16,10 @@ public struct ChunkCoord {
         X = x;
         Y = y;
         Z = z;
+    }
+
+    public override string ToString() {
+        return $"{X}, {Y}, {Z}";
     }
 }
 
@@ -38,11 +40,25 @@ public class Chunk {
         for(int i = 0; i < blocks.GetLength(0); i++) {
             for(int j = 0; j < blocks.GetLength(1); j++) {
                 for(int k = 0; k < blocks.GetLength(2); k++) {
-                    blocks[i, j, k] = (byte)((i + j + k) % Block.Blocks.Length);
-                    if(j == 15)
-                        blocks[i, j, k] = 2;
-                    else
-                        blocks[i, j, k] = 1;
+                    byte block;
+
+                    switch(j) {
+                        case >= 0 and < 10:
+                            block = 3;
+                            break;
+                        case >= 10 and < 15:
+                            block = 1;
+                            break;
+                        case 15:
+                            block = 2;
+                            break;
+                        default:
+                            block = 0;
+                            break;
+                    }
+
+                    //block = (byte)((i + j + k) % Block.Blocks.Length);
+                    blocks[i, j, k] = block;
                 }
             }
         }

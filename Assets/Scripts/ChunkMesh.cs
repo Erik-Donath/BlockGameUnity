@@ -14,6 +14,7 @@ public class ChunkMesh {
         _gameObject = new GameObject();
         _gameObject.transform.position = coord.Position * ChunkSize;
         _gameObject.transform.parent   = World.Instance.transform;
+        _gameObject.name = $"Chunk {coord}";
 
         _meshRenderer = _gameObject.AddComponent<MeshRenderer>();
         _meshFilter   = _gameObject.AddComponent<MeshFilter>();
@@ -87,9 +88,9 @@ public class ChunkMesh {
         mesh.uv        = uvs;
         mesh.triangles = triangles;
 
-        //mesh.RecalculateBounds();
+        mesh.RecalculateBounds();
         mesh.RecalculateNormals();
-        //mesh.RecalculateTangents();
+        mesh.RecalculateTangents();
 
         _meshFilter.mesh = mesh;
     }
