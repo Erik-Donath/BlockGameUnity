@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace BlockData {
     public struct BlockNabours {
         public bool North, South, West, East, Up, Down;
@@ -21,5 +23,40 @@ namespace BlockData {
             Up    = solids[4];
             Down  = solids[5];
         }
+    }
+
+    public enum FaceDirection : int {
+        North = 0,
+        South = 1,
+        West = 2,
+        East = 3,
+        Up = 4,
+        Down = 5,
+    }
+
+    public readonly struct VoxelFace {
+        public readonly Vector3Int Position;
+        public readonly FaceDirection Direction;
+        public readonly Vector4 UV;
+
+        public VoxelFace(Vector3Int pos, FaceDirection direction, Vector4 uv) {
+            Position = pos;
+            Direction = direction;
+            UV = uv;
+        }
+    }
+
+    public static class Data {
+
+        public static readonly Vector3Int[] InDirection = new Vector3Int[6] {
+            new Vector3Int(0, 0, +1), // North
+            new Vector3Int(0, 0, -1), // South
+
+            new Vector3Int(-1, 0, 0), // West
+            new Vector3Int(+1, 0, 0), // East
+
+            new Vector3Int(0, +1, 0), // Up
+            new Vector3Int(0, -1, 0), // Down
+        };
     }
 }

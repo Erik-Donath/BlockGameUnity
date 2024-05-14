@@ -1,7 +1,19 @@
 using BlockData;
 
 using UnityEngine;
-using UnityEngine.UIElements;
+
+public struct ChunkCoord {
+    int X, Y, Z;
+
+    public Vector3Int Position {
+        set {
+            X = value.x;
+            Y = value.y;
+            Z = value.z;
+        }
+        get => new Vector3Int(X, Y, Z);
+    }
+}
 
 public class Chunk {
     public const int ChunkSize = 16;
@@ -26,6 +38,10 @@ public class Chunk {
             for(int j = 0; j < blocks.GetLength(1); j++) {
                 for(int k = 0; k < blocks.GetLength(2); k++) {
                     blocks[i, j, k] = (byte)((i + j + k) % Block.Blocks.Length);
+                    if(j == 15)
+                        blocks[i, j, k] = 2;
+                    else
+                        blocks[i, j, k] = 1;
                 }
             }
         }
@@ -63,7 +79,7 @@ public class Chunk {
             BlockNabours nabours = GetNaboursDetails(position);
             voxelMesh.AddFaces(vmodel.GetFaces(position, nabours));
         }
-        else throw new System.NotImplementedException("Nur primitve(voxel) blöcke sind unterstützt.");
+        else throw new System.NotImplementedException("Nur primitve(voxel) blï¿½cke sind unterstï¿½tzt.");
     }
 
     private BlockData.BlockNabours GetNaboursDetails(Vector3Int pos) {
@@ -74,7 +90,7 @@ public class Chunk {
 
         bool[] solids = new bool[6];
         for(int i = 0; i < 6; i++)
-            solids[i] = IsSolid(pos + VoxelData.InDirection[i]);
+            solids[i] = IsSolid(pos + BlockData.Data.InDirection[i]);
         return new BlockData.BlockNabours(solids);
     }
 

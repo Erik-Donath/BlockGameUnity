@@ -4,7 +4,15 @@ using UnityEngine;
 
 public class World : MonoBehaviour {
     [SerializeField] private Material  material;
-    [SerializeField] private Vector4[] textures;
+    [SerializeField] private int HorizontalTextureCount = 1; // x
+    [SerializeField] private int VerticalTextureCount = 1;   // y
+
+    public int GetHorizontalTextureCount() {
+        return HorizontalTextureCount;
+    }
+    public int GetVerticalTextureCount() {
+        return VerticalTextureCount;
+    }
 
     public static World Instance {
         get => instance;
