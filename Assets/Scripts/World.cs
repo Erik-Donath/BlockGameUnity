@@ -23,12 +23,12 @@ public class World : MonoBehaviour {
 
     private void Start() {
         instance = this;
-        CreateChunk(new Vector3Int(0, 0, 0));
+        CreateChunk(new ChunkCoord(0,0,0));
     }
 
-    private void CreateChunk(Vector3Int coord) {
+    private void CreateChunk(ChunkCoord coord) {
         Chunk chunk = new Chunk(coord);
-        chunk.GameObject.transform.SetParent(transform, false);
+        //chunk.GameObject.transform.SetParent(transform, false);
         chunk.GenerateMesh();
         chunks.Add(chunk);
     }

@@ -44,7 +44,7 @@ public class ChunkMesh {
 
 
                     for(int f = 0; f < 6; f++) {
-                        Vector3Int posFace = BlockData.Data.InDirection[f];
+                        Vector3Int posFace = pos + BlockData.Data.InDirection[f];
 
                         if(!IsSolid(ref blocks, posFace)) {
                             faces.Add(new BlockData.VoxelFace(pos, (FaceDirection)f, VoxelTextures.GetTexture(textures[f])));
