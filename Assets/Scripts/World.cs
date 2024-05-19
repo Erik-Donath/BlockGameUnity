@@ -26,12 +26,20 @@ public class World : MonoBehaviour {
     } = new Dictionary<ChunkCoord, Chunk>();
 
     public static bool IsSolid(Vector3Int pos) {
-        Vector3Int coord = pos / Chunk.ChunkSize;
-        Vector3Int block = new Vector3Int(pos.x % Chunk.ChunkSize, pos.y % Chunk.ChunkSize, pos.z % Chunk.ChunkSize);
+        int cs = Chunk.ChunkSize;
 
-        Debug.Log($"{pos}: {coord} <> {block}");
+        Vector3Int block = pos;
+        block.x = (pos.x < 0) ? (cs + pos.x % cs) : (pos.x % cs);
+        block.y = (pos.y < 0) ? (cs + pos.y % cs) : (pos.y % cs);
+        block.z = (pos.z < 0) ? (cs + pos.z % cs) : (pos.z % cs);
 
-        if(Chunks.TryGetValue(new ChunkCoord(coord), out Chunk chunk)) {
+        Vector3Int chunkCoord = pos;
+        chunkCoord.x = (pos.x < 0) ? (pos.x / cs - 1) : pos.x / cs;
+        chunkCoord.y = (pos.y < 0) ? (pos.y / cs - 1) : pos.y / cs;
+        chunkCoord.z = (pos.z < 0) ? (pos.z / cs - 1) : pos.z / cs;
+        //Debug.Log($"Pos-> {pos}, Block -> {block}, Chunk -> {chunkCoord}");
+
+        if(Chunks.TryGetValue(new ChunkCoord(chunkCoord), out Chunk chunk)) {
             return chunk.IsSolid(block);
         }
         return false;
@@ -41,10 +49,12 @@ public class World : MonoBehaviour {
         instance = this;
         Blocks.Init();
 
-        for(int x = 0; x <= 0; x++) {
-            for(int y = 0; y <= 0; y++) {
+        for(int x = -2; x <= 2; x++) {
+            for(int y = -2; y <= 2; y++) {
                 ChunkCoord coord = new ChunkCoord(x, 0, y);
+                Debug.Log($"{coord.Position}");
                 CreateChunk(coord);
+                Debug.Log("p");
             }
         }
     }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Drawing;
 
 using ModelData;
 using UnityEngine;
@@ -94,7 +95,9 @@ public class ChunkMesh {
         if( pos.x < 0 || pos.x >= blocks.GetLength(0) ||
             pos.y < 0 || pos.y >= blocks.GetLength(1) ||
             pos.z < 0 || pos.z >= blocks.GetLength(2)
-        ) return World.IsSolid(_coord.Position * Chunk.ChunkSize + pos);
+        ) {
+            return World.IsSolid(_coord.Position * Chunk.ChunkSize + pos);
+        }
         return Blocks.blocks[blocks[pos.x, pos.y, pos.z]].Solid;
     }
 }

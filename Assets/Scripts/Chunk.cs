@@ -79,7 +79,9 @@ public class Chunk {
         if(pos.x < 0 || pos.x >= blocks.GetLength(0) ||
             pos.y < 0 || pos.y >= blocks.GetLength(1) ||
             pos.z < 0 || pos.z >= blocks.GetLength(2)
-        ) return World.IsSolid(Coord.Position * ChunkSize + pos);
+        ) {
+            return World.IsSolid(Coord.Position * ChunkSize + pos);
+        }
         return Blocks.blocks[blocks[pos.x, pos.y, pos.z]].Solid;
     }
 }
