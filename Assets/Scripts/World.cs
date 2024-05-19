@@ -17,15 +17,34 @@ public class World : MonoBehaviour {
     public static World Instance {
         get => instance;
     }
-    public Material Material {
-        get => material;
+    public static Material Material {
+        get => Instance.material;
+    }
+
+    public static Dictionary<ChunkCoord, Chunk> Chunks {
+        get; private set;
+    } = new Dictionary<ChunkCoord, Chunk>();
+
+    public static bool IsSolid(Vector3Int pos) {
+        Vector3Int coord = pos / Chunk.ChunkSize;
+        Vector3Int block = new Vector3Int(pos.x % Chunk.ChunkSize, pos.y % Chunk.ChunkSize, pos.z % Chunk.ChunkSize);
+
+        Debug.Log($"{pos}: {coord} <> {block}");
+
+        if(Chunks.TryGetValue(new ChunkCoord(coord), out Chunk chunk)) {
+            return chunk.IsSolid(block);
+        }
+        return false;
     }
 
     private void Start() {
         instance = this;
-        for(int x = -10; x <= 10; x++) {
-            for(int y = -10; y <= 10; y++) {
-                CreateChunk(new ChunkCoord(x, 0, y));
+        Blocks.Init();
+
+        for(int x = 0; x <= 0; x++) {
+            for(int y = 0; y <= 0; y++) {
+                ChunkCoord coord = new ChunkCoord(x, 0, y);
+                CreateChunk(coord);
             }
         }
     }
@@ -33,9 +52,8 @@ public class World : MonoBehaviour {
     private void CreateChunk(ChunkCoord coord) {
         Chunk chunk = new Chunk(coord);
         chunk.GenerateMesh();
-        chunks.Add(chunk);
+        Chunks[coord] = chunk;
     }
 
-    private List<Chunk> chunks = new List<Chunk>();
     private static World instance = null;
 }

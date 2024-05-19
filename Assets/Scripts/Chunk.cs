@@ -17,6 +17,11 @@ public struct ChunkCoord {
         Y = y;
         Z = z;
     }
+    public ChunkCoord(Vector3Int position) {
+        X = position.x;
+        Y = position.y;
+        Z = position.z;
+    }
 
     public override string ToString() {
         return $"{X}, {Y}, {Z}";
@@ -24,6 +29,8 @@ public struct ChunkCoord {
 }
 
 public class Chunk {
+    public const int ChunkSize = 16;
+
     public ChunkCoord Coord {
         get; private set;
     }
@@ -35,7 +42,7 @@ public class Chunk {
         Coord = coord;
 
         mesh = new ChunkMesh(coord);
-        blocks = new byte[ChunkMesh.ChunkSize, ChunkMesh.ChunkSize, ChunkMesh.ChunkSize];
+        blocks = new byte[ChunkSize, ChunkSize, ChunkSize];
 
         for(int i = 0; i < blocks.GetLength(0); i++) {
             for(int j = 0; j < blocks.GetLength(1); j++) {
@@ -44,16 +51,16 @@ public class Chunk {
 
                     switch(j) {
                         case >= 0 and < 10:
-                            block = 3;
+                            block = (byte)Blocks.BlockId.Stone;
                             break;
                         case >= 10 and < 15:
-                            block = 1;
+                            block = (byte)Blocks.BlockId.Dirt;
                             break;
                         case 15:
-                            block = 2;
+                            block = (byte)Blocks.BlockId.Grass;
                             break;
                         default:
-                            block = 0;
+                            block = (byte)Blocks.BlockId.Air;
                             break;
                     }
 
@@ -68,12 +75,11 @@ public class Chunk {
         mesh.BuildMesh(ref blocks);
     }
 
-    private bool IsSolid(Vector3Int pos) {
+    public bool IsSolid(Vector3Int pos) {
         if(pos.x < 0 || pos.x >= blocks.GetLength(0) ||
             pos.y < 0 || pos.y >= blocks.GetLength(1) ||
             pos.z < 0 || pos.z >= blocks.GetLength(2)
-        )
-            return false;
-        return Block.Blocks[blocks[pos.x, pos.y, pos.z]].Solid;
+        ) return World.IsSolid(Coord.Position * ChunkSize + pos);
+        return Blocks.blocks[blocks[pos.x, pos.y, pos.z]].Solid;
     }
 }

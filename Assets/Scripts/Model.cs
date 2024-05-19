@@ -1,39 +1,33 @@
-using BlockData;
-using System.Collections.Generic;
-using UnityEngine;
-
-public interface IModel {
-    public bool IsPrimitv { get; }
-}
-
-public class BlockStates {
-    public IModel DefaultModel {
-    get; private set; }
-
-    public BlockStates(IModel defaultModel) {
-        DefaultModel = defaultModel;
+public struct ModelFace {
+    public int Texture {
+        get; private set;
+    }
+    public ModelFace(int texture) {
+        this.Texture = texture;
     }
 }
 
-public class VoxelModel : IModel {
-    public bool IsPrimitv => true;
-    public VoxelTextures Textures {
+public class Model {
+    public ModelFace NorthFace { get => Faces[0]; private set => Faces[0] = value; }
+    public ModelFace SouthFace { get => Faces[1]; private set => Faces[1] = value; }
+    public ModelFace WestFace  { get => Faces[2]; private set => Faces[2] = value; }
+    public ModelFace EastFace  { get => Faces[3]; private set => Faces[3] = value; }
+    public ModelFace UpFace    { get => Faces[4]; private set => Faces[4] = value; }
+    public ModelFace DownFace  { get => Faces[5]; private set => Faces[5] = value; }
+
+    public ModelFace[] Faces {
         get; private set;
     }
 
-    public VoxelModel(VoxelTextures textures) {
-        Textures = textures;
+    public Model(ModelFace[] faces) {
+        if(faces.Length != 6)
+            throw new System.ArgumentException("Faces must be of Lenght 6");
+        Faces = faces;
     }
-
-    public List<VoxelFace> GetFaces(Vector3Int position, BlockNabours nabours) {
-        List<VoxelFace> faces = new List<VoxelFace>();
-        bool[] solids = nabours.Solids;
-        int[] textures = Textures.Textures;
-
-        for(int i = 0; i < 6; i++) {
-            if(!solids[i])
-                faces.Add(new VoxelFace(position, (FaceDirection)i, VoxelTextures.GetTexture(textures[i])));
-        }
-        return faces;
+    public Model(ModelFace face) {
+        Faces = new ModelFace[6] { face, face, face, face, face, face };
+    }
+    public Model(ModelFace up, ModelFace down, ModelFace sides) {
+        Faces = new ModelFace[6] { sides, sides, sides, sides, up, down };
     }
 }
