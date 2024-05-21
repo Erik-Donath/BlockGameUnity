@@ -6,6 +6,7 @@ public static class Blocks {
         Stone = 1,
         Dirt  = 2,
         Grass = 3,
+        Debug = 4,
     };
 
     public static Model[] models {
@@ -25,10 +26,12 @@ public static class Blocks {
         models[(int)BlockId.Stone] = new Model(new ModelFace(4));
         models[(int)BlockId.Dirt]  = new Model(new ModelFace(1));
         models[(int)BlockId.Grass] = new Model(new ModelFace(3), new ModelFace(1), new ModelFace(2));
+        models[(int)BlockId.Debug] = new Model(new ModelFace(5));
 
         blocks[(int)BlockId.Air]   = new Block("Air",   false, models[(int)BlockId.Air]);
         blocks[(int)BlockId.Stone] = new Block("Stone", true,  models[(int)BlockId.Stone]);
         blocks[(int)BlockId.Dirt]  = new Block("Dirt",  true,  models[(int)BlockId.Dirt]);
         blocks[(int)BlockId.Grass] = new Block("Grass", true,  models[(int)BlockId.Grass]);
+        blocks[(int)BlockId.Debug] = new Block("Debug", true,  models[(int)BlockId.Debug]);
     }
 }

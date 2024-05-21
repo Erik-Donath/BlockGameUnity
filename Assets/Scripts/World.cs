@@ -29,18 +29,18 @@ public class World : MonoBehaviour {
         int cs = Chunk.ChunkSize;
 
         Vector3Int block = pos;
-        block.x = (pos.x < 0) ? (cs + pos.x % cs) : (pos.x % cs);
-        block.y = (pos.y < 0) ? (cs + pos.y % cs) : (pos.y % cs);
-        block.z = (pos.z < 0) ? (cs + pos.z % cs) : (pos.z % cs);
+        block.x = (block.x >= 0) ? (block.x % cs) : (cs + block.x % cs - 1);
+        block.y = (block.y >= 0) ? (block.y % cs) : (cs + block.y % cs - 1);
+        block.z = (block.z >= 0) ? (block.z % cs) : (cs + block.z % cs - 1);
 
-        Vector3Int chunkCoord = pos;
-        chunkCoord.x = (pos.x < 0) ? (pos.x / cs - 1) : pos.x / cs;
-        chunkCoord.y = (pos.y < 0) ? (pos.y / cs - 1) : pos.y / cs;
-        chunkCoord.z = (pos.z < 0) ? (pos.z / cs - 1) : pos.z / cs;
-        //Debug.Log($"Pos-> {pos}, Block -> {block}, Chunk -> {chunkCoord}");
+        Vector3Int chunk = pos;
+        chunk.x = (chunk.x >= 0) ? (chunk.x / cs) : (chunk.x / cs - 1);
+        chunk.y = (chunk.y >= 0) ? (chunk.y / cs) : (chunk.y / cs - 1);
+        chunk.z = (chunk.z >= 0) ? (chunk.z / cs) : (chunk.z / cs - 1);
 
-        if(Chunks.TryGetValue(new ChunkCoord(chunkCoord), out Chunk chunk)) {
-            return chunk.IsSolid(block);
+        if(Chunks.TryGetValue(new ChunkCoord(chunk), out Chunk c)) {
+            //Debug.Log($"{pos} - {chunk}: {block}");
+            return c.IsSolid(block);
         }
         return false;
     }
@@ -49,19 +49,21 @@ public class World : MonoBehaviour {
         instance = this;
         Blocks.Init();
 
-        for(int x = -2; x <= 2; x++) {
-            for(int y = -2; y <= 2; y++) {
-                ChunkCoord coord = new ChunkCoord(x, 0, y);
-                Debug.Log($"{coord.Position}");
-                CreateChunk(coord);
-                Debug.Log("p");
+        for(int x = -1; x <= 1; x++) {
+            for(int y = -1; y <= 1; y++) {
+                for(int z = -1; z <= 1; z++) {
+                    ChunkCoord coord = new ChunkCoord(x, y, z);
+                    CreateChunk(coord);
+                }
             }
+        }
+        foreach(var c in Chunks) {
+            c.Value.GenerateMesh();
         }
     }
 
     private void CreateChunk(ChunkCoord coord) {
         Chunk chunk = new Chunk(coord);
-        chunk.GenerateMesh();
         Chunks[coord] = chunk;
     }
 

@@ -27,12 +27,12 @@ public class ChunkMesh {
         Object.DestroyImmediate(_gameObject);
     }
 
-    public void BuildMesh(ref byte[,,] blocks) {
+    public void BuildMesh(ref Chunk c) {
         List<MeshFace> faces = new List<MeshFace>();
-        for(int y = 0; y < blocks.GetLength(1); y++) {
-            for(int x = 0; x < blocks.GetLength(0); x++) {
-                for(int z = 0; z < blocks.GetLength(2); z++) {
-                    byte block = blocks[x, y, z];
+        for(int y = 0; y < c.GetBlocks.GetLength(1); y++) {
+            for(int x = 0; x < c.GetBlocks.GetLength(0); x++) {
+                for(int z = 0; z < c.GetBlocks.GetLength(2); z++) {
+                    byte block = c.GetBlocks[x, y, z];
                     ref Block blockType = ref Blocks.blocks[block];
                     Vector3Int pos = new Vector3Int(x, y, z);
 
@@ -43,7 +43,7 @@ public class ChunkMesh {
                     for(int f = 0; f < 6; f++) {
                         Vector3Int posFace = pos + Data.InDirection[f];
 
-                        if(!IsSolid(ref blocks, posFace)) {
+                        if(!c.IsSolid(posFace)) {
                             faces.Add(new MeshFace(pos, (Direction)f, Data.GetTexture(model.Faces[f].Texture)));
                         }
                     }
@@ -89,15 +89,5 @@ public class ChunkMesh {
         mesh.RecalculateTangents();
 
         _meshFilter.mesh = mesh;
-    }
-
-    private bool IsSolid(ref byte[,,] blocks, Vector3Int pos) {
-        if( pos.x < 0 || pos.x >= blocks.GetLength(0) ||
-            pos.y < 0 || pos.y >= blocks.GetLength(1) ||
-            pos.z < 0 || pos.z >= blocks.GetLength(2)
-        ) {
-            return World.IsSolid(_coord.Position * Chunk.ChunkSize + pos);
-        }
-        return Blocks.blocks[blocks[pos.x, pos.y, pos.z]].Solid;
     }
 }

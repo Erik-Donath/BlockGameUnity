@@ -34,6 +34,9 @@ public class Chunk {
     public ChunkCoord Coord {
         get; private set;
     }
+    public byte[,,] GetBlocks {
+        get => blocks;
+    }
 
     private ChunkMesh mesh;
     private byte[,,] blocks;
@@ -63,8 +66,12 @@ public class Chunk {
                             block = (byte)Blocks.BlockId.Air;
                             break;
                     }
+                    //float c = (Mathf.Sin(2 * Mathf.PI * (i / 16.0f) + (j / 16.0f) + (k / 16.0f)) + 1) / 2;
+                    //block = (byte)(c * 4);
 
+                    //Debug.Log(block);
                     //block = (byte)((i + j + k) % Block.Blocks.Length);
+                    block = 4;
                     blocks[i, j, k] = block;
                 }
             }
@@ -72,15 +79,18 @@ public class Chunk {
     }
 
     public void GenerateMesh() {
-        mesh.BuildMesh(ref blocks);
+        Chunk c = this;
+        mesh.BuildMesh(ref c);
     }
 
     public bool IsSolid(Vector3Int pos) {
-        if(pos.x < 0 || pos.x >= blocks.GetLength(0) ||
+        if( pos.x < 0 || pos.x >= blocks.GetLength(0) ||
             pos.y < 0 || pos.y >= blocks.GetLength(1) ||
             pos.z < 0 || pos.z >= blocks.GetLength(2)
         ) {
-            return World.IsSolid(Coord.Position * ChunkSize + pos);
+            return false;
+            //Vector3Int worldPos = Positions.FromArrayPositionToWorldPosition(pos, Coord.Position);
+            //return World.IsSolid(worldPos);
         }
         return Blocks.blocks[blocks[pos.x, pos.y, pos.z]].Solid;
     }
