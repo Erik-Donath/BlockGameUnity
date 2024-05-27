@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Drawing;
 
 using ModelData;
 using UnityEngine;
@@ -43,7 +42,7 @@ public class ChunkMesh {
                     for(int f = 0; f < 6; f++) {
                         Vector3Int posFace = pos + Data.InDirection[f];
 
-                        if(!c.IsSolid(posFace)) {
+                        if(!c.IsSolidLocal(posFace)) {
                             faces.Add(new MeshFace(pos, (Direction)f, Data.GetTexture(model.Faces[f].Texture)));
                         }
                     }
@@ -78,7 +77,7 @@ public class ChunkMesh {
         }
 
         Mesh mesh = new Mesh();
-        mesh.name = "Chunk Mesh";
+        mesh.name = $"Chunk Mesh {_coord}";
 
         mesh.vertices  = positions;
         mesh.uv        = uvs;

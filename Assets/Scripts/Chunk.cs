@@ -47,12 +47,17 @@ public class Chunk {
         mesh = new ChunkMesh(coord);
         blocks = new byte[ChunkSize, ChunkSize, ChunkSize];
 
+        GenerateTerain();
+    }
+
+    public void GenerateTerain() {
         for(int i = 0; i < blocks.GetLength(0); i++) {
             for(int j = 0; j < blocks.GetLength(1); j++) {
                 for(int k = 0; k < blocks.GetLength(2); k++) {
+                    Vector3Int realPos = new Vector3Int(i, j, k) + Coord.Position * ChunkSize;
                     byte block;
 
-                    switch(j) {
+                    switch(realPos.y) {
                         case >= 0 and < 10:
                             block = (byte)Blocks.BlockId.Stone;
                             break;
@@ -71,7 +76,7 @@ public class Chunk {
 
                     //Debug.Log(block);
                     //block = (byte)((i + j + k) % Block.Blocks.Length);
-                    block = 4;
+                    //block = 4;
                     blocks[i, j, k] = block;
                 }
             }
@@ -83,15 +88,26 @@ public class Chunk {
         mesh.BuildMesh(ref c);
     }
 
-    public bool IsSolid(Vector3Int pos) {
-        if( pos.x < 0 || pos.x >= blocks.GetLength(0) ||
-            pos.y < 0 || pos.y >= blocks.GetLength(1) ||
-            pos.z < 0 || pos.z >= blocks.GetLength(2)
-        ) {
+    public bool InChunkLocal(Vector3Int pos) {
+        return (
+            pos.x < 0 || pos.x >= ChunkSize ||
+            pos.y < 0 || pos.y >= ChunkSize ||
+            pos.z < 0 || pos.z >= ChunkSize
+        );
+    }
+
+    public bool IsSolidLocal(Vector3Int pos) {
+        if(InChunkLocal(pos)) {
             return false;
-            //Vector3Int worldPos = Positions.FromArrayPositionToWorldPosition(pos, Coord.Position);
-            //return World.IsSolid(worldPos);
         }
         return Blocks.blocks[blocks[pos.x, pos.y, pos.z]].Solid;
+    }
+
+    private Vector3Int ConvertToWorldPos(Vector3Int pos) { // Consider only chunks that are +x +y +z
+        Vector3Int cpos = Coord.Position;
+        if(cpos.x < 0 || cpos.y < 0 || cpos.z < 0) {
+            return Vector3Int.zero;
+        }
+        return pos + cpos * ChunkSize; 
     }
 }

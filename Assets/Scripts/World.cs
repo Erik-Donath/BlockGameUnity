@@ -25,26 +25,6 @@ public class World : MonoBehaviour {
         get; private set;
     } = new Dictionary<ChunkCoord, Chunk>();
 
-    public static bool IsSolid(Vector3Int pos) {
-        int cs = Chunk.ChunkSize;
-
-        Vector3Int block = pos;
-        block.x = (block.x >= 0) ? (block.x % cs) : (cs + block.x % cs - 1);
-        block.y = (block.y >= 0) ? (block.y % cs) : (cs + block.y % cs - 1);
-        block.z = (block.z >= 0) ? (block.z % cs) : (cs + block.z % cs - 1);
-
-        Vector3Int chunk = pos;
-        chunk.x = (chunk.x >= 0) ? (chunk.x / cs) : (chunk.x / cs - 1);
-        chunk.y = (chunk.y >= 0) ? (chunk.y / cs) : (chunk.y / cs - 1);
-        chunk.z = (chunk.z >= 0) ? (chunk.z / cs) : (chunk.z / cs - 1);
-
-        if(Chunks.TryGetValue(new ChunkCoord(chunk), out Chunk c)) {
-            //Debug.Log($"{pos} - {chunk}: {block}");
-            return c.IsSolid(block);
-        }
-        return false;
-    }
-
     private void Start() {
         instance = this;
         Blocks.Init();

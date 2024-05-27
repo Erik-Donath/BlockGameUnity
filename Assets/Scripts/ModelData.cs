@@ -34,18 +34,15 @@ namespace ModelData {
             World world     = World.Instance;
             Texture texture = World.Material.mainTexture;
 
-            int x = textureID % world.GetHorizontalTextureCount();
-            int y = textureID / world.GetHorizontalTextureCount();
+            float normilizedH = 1f / world.GetHorizontalTextureCount();
+            float normilizedV = 1f / world.GetVerticalTextureCount();
 
-            float width = texture.width / world.GetHorizontalTextureCount();
-            float height = texture.height / world.GetVerticalTextureCount();
+            float y = textureID / world.GetHorizontalTextureCount();
+            float x = textureID - (y * world.GetHorizontalTextureCount());
+            y *= normilizedV;
+            x *= normilizedH;
 
-            Vector4 vec = new Vector4(
-                (width * x) / texture.width,
-                (height * y) / texture.height,
-                (width * (x + 1.0f)) / texture.width,
-                (height * (y + 1.0f)) / texture.height
-            );
+            Vector4 vec = new Vector4(x, y, x + normilizedH, y + normilizedV);
             return vec;
         }
 
