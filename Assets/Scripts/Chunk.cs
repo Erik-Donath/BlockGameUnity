@@ -1,37 +1,12 @@
+using System;
+using System.Drawing;
+
 using UnityEngine;
-
-public struct ChunkCoord {
-    int X, Y, Z;
-
-    public Vector3Int Position {
-        set {
-            X = value.x;
-            Y = value.y;
-            Z = value.z;
-        }
-        get => new Vector3Int(X, Y, Z);
-    }
-
-    public ChunkCoord(int x, int y, int z) {
-        X = x;
-        Y = y;
-        Z = z;
-    }
-    public ChunkCoord(Vector3Int position) {
-        X = position.x;
-        Y = position.y;
-        Z = position.z;
-    }
-
-    public override string ToString() {
-        return $"{X}, {Y}, {Z}";
-    }
-}
 
 public class Chunk {
     public const int ChunkSize = 16;
 
-    public ChunkCoord Coord {
+    public Vector2Int Coord {
         get; private set;
     }
     public byte[,,] GetBlocks {
@@ -41,54 +16,61 @@ public class Chunk {
     private ChunkMesh mesh;
     private byte[,,] blocks;
 
-    public Chunk(ChunkCoord coord) {
+    public Chunk(Vector2Int coord) {
         Coord = coord;
 
         mesh = new ChunkMesh(coord);
         blocks = new byte[ChunkSize, ChunkSize, ChunkSize];
-
-        GenerateTerain();
+        Debug.Log($"Created Chunk {Coord}");
+    }
+    ~Chunk() {
+        mesh = null;
+        blocks = null;
+        Delete();
     }
 
-    public void GenerateTerain() {
-        for(int i = 0; i < blocks.GetLength(0); i++) {
-            for(int j = 0; j < blocks.GetLength(1); j++) {
-                for(int k = 0; k < blocks.GetLength(2); k++) {
-                    Vector3Int realPos = new Vector3Int(i, j, k) + Coord.Position * ChunkSize;
-                    byte block;
+    public void Delete() {
+        mesh.Delete();
+        Debug.Log($"Deleted Chunk {Coord}");
+    }
 
-                    switch(realPos.y) {
-                        case >= 0 and < 10:
-                            block = (byte)Blocks.BlockId.Stone;
+
+    public void GenerateTerain() {
+        for(int x = 0; x < blocks.GetLength(0); x++) {
+            for(int z = 0; z < blocks.GetLength(2); z++) {
+                int height = (int)Mathf.Floor(Noise.Get2DPerlinNoise(new Vector2(x, z) + Coord * ChunkSize, 31415.0f, 0.075218249f) * (blocks.GetLength(1) - 4 - 2) + 4);
+                if(height > blocks.GetLength(1)) height = blocks.GetLength(1) - 1;
+                for(int y = 0; y < blocks.GetLength(1); y++) {
+                    float pers = ((float)y / height) * 100.0f;
+                    Blocks.BlockId id = Blocks.BlockId.Air;
+                    switch(pers) {
+                        case >= 0 and < 70:
+                            id = Blocks.BlockId.Stone;
                             break;
-                        case >= 10 and < 15:
-                            block = (byte)Blocks.BlockId.Dirt;
-                            break;
-                        case 15:
-                            block = (byte)Blocks.BlockId.Grass;
-                            break;
-                        default:
-                            block = (byte)Blocks.BlockId.Air;
+                        case >= 70 and < 100:
+                            id = Blocks.BlockId.Dirt;
                             break;
                     }
-                    //float c = (Mathf.Sin(2 * Mathf.PI * (i / 16.0f) + (j / 16.0f) + (k / 16.0f)) + 1) / 2;
-                    //block = (byte)(c * 4);
 
-                    //Debug.Log(block);
-                    //block = (byte)((i + j + k) % Block.Blocks.Length);
-                    //block = 4;
-                    blocks[i, j, k] = block;
+                    if(y == height)
+                        id = Blocks.BlockId.Grass;
+                    if(y > height)
+                        id = Blocks.BlockId.Air;
+                    if(y == 0)
+                        id = Blocks.BlockId.Bedrock;
+                    blocks[x, y, z] = (byte)id;
                 }
             }
         }
+        World.Instance.AddUpdateChunk(Coord);
     }
 
-    public void GenerateMesh() {
+    public void UpdateMesh() {
         Chunk c = this;
         mesh.BuildMesh(ref c);
     }
 
-    public bool InChunkLocal(Vector3Int pos) {
+    public bool NotInChunkLocal(Vector3Int pos) {
         return (
             pos.x < 0 || pos.x >= ChunkSize ||
             pos.y < 0 || pos.y >= ChunkSize ||
@@ -96,18 +78,19 @@ public class Chunk {
         );
     }
 
-    public bool IsSolidLocal(Vector3Int pos) {
-        if(InChunkLocal(pos)) {
-            return false;
+    public bool IsSolid(Vector3Int pos, bool noWorld = false) { // noWorld ist um zu verhinder das es zum Loop kommt. Auch wenn das unmöglich sein sollte!
+        if(NotInChunkLocal(pos)) {
+            if(noWorld) {
+                Debug.Log($"Failed to get solid on {pos} in {Coord}.");
+                return false;
+            }
+            return World.Instance.IsSolidLocal(pos, Coord);
         }
         return Blocks.blocks[blocks[pos.x, pos.y, pos.z]].Solid;
     }
-
-    private Vector3Int ConvertToWorldPos(Vector3Int pos) { // Consider only chunks that are +x +y +z
-        Vector3Int cpos = Coord.Position;
-        if(cpos.x < 0 || cpos.y < 0 || cpos.z < 0) {
-            return Vector3Int.zero;
-        }
-        return pos + cpos * ChunkSize; 
-    }
 }
+
+/*
+ Chunk:
+    Diese Klasse beschreibt die Strukture und funktionalität eines Chunks.
+*/

@@ -1,18 +1,19 @@
+using System;
 using System.Collections.Generic;
 
 using ModelData;
 using UnityEngine;
 
 public class ChunkMesh {
-    private ChunkCoord   _coord;
+    private Vector2Int   _coord;
     private GameObject   _gameObject;
     private MeshRenderer _meshRenderer;
     private MeshFilter   _meshFilter;
 
-    public ChunkMesh(ChunkCoord coord) {
+    public ChunkMesh(Vector2Int coord) {
         _coord = coord;
         _gameObject = new GameObject();
-        _gameObject.transform.position = coord.Position * Chunk.ChunkSize;
+        _gameObject.transform.position = new Vector3Int(coord.x, 0, coord.y) * Chunk.ChunkSize;
         _gameObject.transform.parent   = World.Instance.transform;
         _gameObject.name = $"Chunk {coord}";
 
@@ -23,7 +24,13 @@ public class ChunkMesh {
     }
 
     ~ChunkMesh() {
-        Object.DestroyImmediate(_gameObject);
+        Delete();
+    }
+    public void Delete() {
+        _gameObject.transform.SetParent(null);
+        _gameObject.name = "Deleted";
+        _gameObject.SetActive(false);
+        GameObject.DestroyImmediate(_gameObject, true);
     }
 
     public void BuildMesh(ref Chunk c) {
@@ -42,7 +49,7 @@ public class ChunkMesh {
                     for(int f = 0; f < 6; f++) {
                         Vector3Int posFace = pos + Data.InDirection[f];
 
-                        if(!c.IsSolidLocal(posFace)) {
+                        if(!c.IsSolid(posFace)) {
                             faces.Add(new MeshFace(pos, (Direction)f, Data.GetTexture(model.Faces[f].Texture)));
                         }
                     }
@@ -90,3 +97,8 @@ public class ChunkMesh {
         _meshFilter.mesh = mesh;
     }
 }
+
+/*
+ ChunkMesh:
+ Hier wird das Unity GameObjekt des Chunks erstellt und das Mesh wird von den Block Daten generiert.
+*/

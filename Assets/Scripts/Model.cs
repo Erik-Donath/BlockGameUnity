@@ -31,3 +31,11 @@ public class Model {
         Faces = new ModelFace[6] { sides, sides, sides, sides, up, down };
     }
 }
+
+/*
+ Model:
+ Hier wird das Model mit 6 Seiten dargestellt.
+ 
+ ModelFace:
+ Abstraction um eine Seite des Models darzustellen.
+*/
