@@ -33,6 +33,13 @@ public class World : MonoBehaviour {
             return new Vector2Int((int)pos.x / Chunk.ChunkSize, (int)pos.z / Chunk.ChunkSize);
         }
     }
+    public Vector3Int PlayerBlockCoord {
+        get {
+            Vector3 pos = player.transform.position;
+            return new Vector3Int((int)MathF.Floor(pos.x), (int)MathF.Floor(pos.y), (int)MathF.Floor(pos.z));
+        }
+    }
+
     public void AddUpdateChunk(Vector2Int c) {
         updateChunks.Add(new Vector2Int(c.x - 1, c.y + 0));
         updateChunks.Add(new Vector2Int(c.x + 0, c.y - 1));
