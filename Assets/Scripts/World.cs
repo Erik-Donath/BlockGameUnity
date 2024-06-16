@@ -10,14 +10,10 @@ public class World : MonoBehaviour {
     [SerializeField, Range(1, 20)] private int renderDistance = 5;
     [SerializeField] private int seed = 0;
     [SerializeField] private Material material;
-    [SerializeField] private int HorizontalTextureCount = 1; // x
-    [SerializeField] private int VerticalTextureCount   = 1; // y
-
-    public int GetHorizontalTextureCount() {
-        return HorizontalTextureCount;
-    }
-    public int GetVerticalTextureCount() {
-        return VerticalTextureCount;
+    [SerializeField] private int HorizontalTextureSize = 16; // x
+    
+    public int GetHorizontalTextureSize() {
+        return HorizontalTextureSize;
     }
 
     public static World Instance {

@@ -1,55 +1,54 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(CharacterController))]
 public class Player : MonoBehaviour {
-    [SerializeField] private GameObject cam;
-    [SerializeField] private float speed = 3.0f;
-    [SerializeField] private float gravity = 9.807f;
+    [SerializeField] private float speed = 5f;
+    [SerializeField] private float sprintMultiplier = 2f;
+    [SerializeField] private float jumpForce = 5f;
+    [SerializeField] private float gravity = 9.81f;
+    [Space]
+    [SerializeField] private Camera cam;
+    [SerializeField] private float mouseSensitivity = 100f;
 
-    [SerializeField] private float width  = 1.0f;
-    [SerializeField] private float height = 2.0f;
+    private CharacterController cc;
+    private Vector3 velocity;
 
-    private bool isGrounded = false;
-    private float h, v;
-    private float mouseH, mouseV;
-
-    public Vector3Int BlockPos {
-        get {
-            Vector3 pos = transform.position;
-            return new Vector3Int((int)Mathf.Floor(pos.x), (int)Mathf.Floor(pos.y), (int)Mathf.Floor(pos.z));
-        }
-        private set {
-            transform.position = value;
-        }
+    private void Start() {
+        cc = gameObject.GetComponent<CharacterController>();
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     private void Update() {
-        GetInput();
-
-        Vector3 velocity = ((transform.forward * v) + (transform.right * h)) * Time.deltaTime * speed;
-        velocity += Vector3.up * -gravity * Time.deltaTime;
-        if(checkDown(velocity.y)) velocity.y = 0.0f;
-
-        transform.Rotate(Vector3.up * mouseH);
-        cam.transform.Rotate(Vector3.right * -mouseV);
-
-        transform.Translate(velocity, Space.World);
+        Look();
+        Move();
+        
     }
 
-    private void GetInput() {
-        h = Input.GetAxis("Horizontal");
-        v = Input.GetAxis("Vertical");
-        mouseH = Input.GetAxis("Mouse X");
-        mouseV = Input.GetAxis("Mouse Y");
+    private void Look() {
+        float mouseH = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
+        float mouseV = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
+
+        cam.transform.position = gameObject.transform.position + new Vector3(0.0f, 1.0f, 0.0f);
+        Vector3 rot = cam.transform.localEulerAngles;
+        rot += new Vector3(-mouseV, mouseH, 0.0f);
+        //rot.x = Mathf.Clamp(rot.x % 360, -90, 90);
+        rot.z = 0;
+
+        cam.transform.localEulerAngles = rot;
+        transform.localEulerAngles = new Vector3(0.0f, rot.y, 0.0f);
     }
 
-    private bool checkDown(float downSpeed = 1.0f) {
-        Vector3Int pos = BlockPos;
-        isGrounded = (
-            World.Instance.IsSolid(new Vector3Int((int)(pos.x + width), (int)(pos.y - downSpeed), (int)(pos.z - width))) ||
-            World.Instance.IsSolid(new Vector3Int((int)(pos.x - width), (int)(pos.y - downSpeed), (int)(pos.z - width))) ||
-            World.Instance.IsSolid(new Vector3Int((int)(pos.x + width), (int)(pos.y - downSpeed), (int)(pos.z + width))) ||
-            World.Instance.IsSolid(new Vector3Int((int)(pos.x - width), (int)(pos.y - downSpeed), (int)(pos.z + width)))
-        );
-        return isGrounded;
+    private void Move() {
+        velocity = transform.right * Input.GetAxis("Horizontal") + transform.forward * Input.GetAxis("Vertical");
+        velocity.Normalize();
+        velocity *= speed * Time.deltaTime;
+
+        if(Input.GetKey(KeyCode.LeftShift)) {
+            velocity *= sprintMultiplier;
+        }
+
+        cc.Move(velocity);
     }
 }
