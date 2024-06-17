@@ -88,6 +88,15 @@ public class Chunk {
         }
         return Blocks.blocks[blocks[pos.x, pos.y, pos.z]].Solid;
     }
+
+    public bool SetBlock(Vector3Int pos, Blocks.BlockId id) {
+        if(NotInChunkLocal(pos)) {
+            Debug.Log($"Failed to set block on {pos} in {Coord}.");
+            return false;
+        }
+        blocks[pos.x, pos.y, pos.z] = (byte)id;
+        return true;
+    }
 }
 
 /*

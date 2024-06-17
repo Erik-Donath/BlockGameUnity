@@ -16,6 +16,32 @@ public class Hotbar : MonoBehaviour {
             Select(value);
         }
     }
+    public Blocks.BlockId SelectedBlockId {
+        get {
+            switch(Selected) {
+                case 0:
+                    return Blocks.BlockId.Dirt;
+                case 1:
+                    return Blocks.BlockId.Grass;
+                case 2:
+                    return Blocks.BlockId.Stone;
+                case 3:
+                    return Blocks.BlockId.Bedrock;
+                case 4:
+                    return Blocks.BlockId.Bricks;
+                case 5:
+                    return Blocks.BlockId.Planks;
+                case 6:
+                    return Blocks.BlockId.Stone_Bricks;
+                case 7:
+                    return Blocks.BlockId.Wool;
+                case 8:
+                    return Blocks.BlockId.Books;
+                default:
+                    return Blocks.BlockId.Air;
+            }
+        }
+    }
 
     private void Start() {
         Select(8);
