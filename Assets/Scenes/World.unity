@@ -561,7 +561,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 5
-  sprintMultiplier: 2
+  sprintMultiplier: 10
   jumpForce: 1
   gravity: -9.81
   cam: {fileID: 182455794}
@@ -1588,9 +1588,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 707228053}
-  worldBorder: 100
+  worldBorder: 10000
   renderDistance: 20
-  seed: 100
   material: {fileID: 2100000, guid: 13684dcd755592541acad677727c729f, type: 2}
   HorizontalTextureSize: 12
 --- !u!1 &2109610371

@@ -8,10 +8,13 @@ using UnityEngine;
 public class World : MonoBehaviour {
     [SerializeField] private GameObject player;
     [SerializeField, Range(0, 10_000)] private int worldBorder = 1000;
-    [SerializeField, Range(1, 20)] private int renderDistance = 5;
-    [SerializeField] private int seed = 0;
+    [SerializeField, Range(1, 100)] private int renderDistance = 5;
     [SerializeField] private Material material;
     [SerializeField] private int HorizontalTextureSize = 16; // x
+
+    public static int Seed {
+        get; set;
+    }
     
     public int GetHorizontalTextureSize() {
         return HorizontalTextureSize;
@@ -92,7 +95,8 @@ public class World : MonoBehaviour {
         instance = this;
         Blocks.Init();
 
-        UnityEngine.Random.InitState(seed);
+        UnityEngine.Random.InitState(Seed);
+        Debug.Log("Current Seed is: " + Seed);
 
         int cs = Chunk.ChunkSize;
         int border = World.Instance.WorldBorder;
@@ -106,8 +110,8 @@ public class World : MonoBehaviour {
 
         int px = PlayerChunkCoord.x;
         int py = PlayerChunkCoord.y;
-        for(int x = px - 1; x < px + 1; x++) {
-            for(int y = py - 1; y < py + 1; y++) {
+        for(int x = px - 5; x < px + 5; x++) {
+            for(int y = py - 5; y < py + 5; y++) {
                 Vector2Int coord = new Vector2Int(x, y);
                 Chunk c = new Chunk(coord);
                 c.GenerateTerain();
@@ -141,6 +145,20 @@ public class World : MonoBehaviour {
                 deleteChunks.Add(pp);
             }
         }
+        foreach(var pp in createChunks) {
+            if(pp.x < px - renderDistance || pp.x >= px + renderDistance ||
+               pp.y < py - renderDistance || pp.y >= py + renderDistance
+            ) deleteChunks.Add(pp);
+        }
+
+        createChunks.ExceptWith(deleteChunks);
+        updateChunks.ExceptWith(deleteChunks);
+
+        HashSet<Vector2Int> deleteDeletes = new HashSet<Vector2Int>();
+        foreach(var pp in deleteChunks) {
+            if(!chunks.ContainsKey(pp)) deleteDeletes.Add(pp);
+        }
+        deleteDeletes.ExceptWith(deleteDeletes);
 
         if(!createChunksTask && createChunks.Count > 0)
             StartCoroutine(CreateChunks());
@@ -157,13 +175,9 @@ public class World : MonoBehaviour {
         createChunksTask = true;
         while(createChunks.Count > 0) {
             Vector2Int coord = createChunks.First();
-            if(chunks.TryGetValue(coord, out var chunk)) {
-                AddUpdateChunk(coord);
-            }
-            else {
+            if(!chunks.ContainsKey(coord)) {
                 Chunk c = new Chunk(coord);
                 c.GenerateTerain();
-                c.UpdateMesh();
                 chunks[coord] = c;
                 AddUpdateChunk(coord);
             }
@@ -198,6 +212,8 @@ public class World : MonoBehaviour {
                 GC.Collect();
             }
             deleteChunks.Remove(coord);
+            createChunks.Remove(coord);
+            updateChunks.Remove(coord);
             yield return null;
         }
         deleteChunksTask = false;
