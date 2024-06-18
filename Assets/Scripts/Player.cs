@@ -6,8 +6,6 @@ using UnityEngine;
 public class Player : MonoBehaviour {
     [SerializeField] private float speed = 5f;
     [SerializeField] private float sprintMultiplier = 2f;
-    [SerializeField] private float jumpForce = 5f;
-    [SerializeField] private float gravity = 9.81f;
     [Space]
     [SerializeField] private Camera cam;
     [SerializeField] private float mouseSensitivity = 100f;
@@ -27,13 +25,15 @@ public class Player : MonoBehaviour {
     private void Start() {
         cc = gameObject.GetComponent<CharacterController>();
         Cursor.lockState = CursorLockMode.Locked;
-        nextPlaceDestroyTime = Time.time - 1.0f;
+        nextPlaceDestroyTime = Time.time;
     }
 
     private void Update() {
         Look();
         Move();
         UpdateHightLight();
+        if(!(Input.GetKey(KeyCode.Mouse0) || Input.GetKey(KeyCode.Mouse1)))
+            nextPlaceDestroyTime = Time.time - 1.0f;
         if(nextPlaceDestroyTime <= Time.time && SetDestroyBlock()) {
             nextPlaceDestroyTime = Time.time + placeDestroyCooldown;
         }
@@ -53,10 +53,18 @@ public class Player : MonoBehaviour {
 
     private void Move() {
         velocity = transform.right * Input.GetAxis("Horizontal") + transform.forward * Input.GetAxis("Vertical");
+
+        if(Input.GetKey(KeyCode.Space)) {
+            velocity.y += 1;
+        }
+        if(Input.GetKey(KeyCode.LeftShift)) {
+            velocity.y -= 1;
+        }
+
         velocity.Normalize();
         velocity *= speed * Time.deltaTime;
 
-        if(Input.GetKey(KeyCode.LeftShift)) {
+        if(Input.GetKey(KeyCode.LeftControl)) {
             velocity *= sprintMultiplier;
         }
 

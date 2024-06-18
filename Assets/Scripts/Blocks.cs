@@ -56,7 +56,7 @@ public static class Blocks {
 
 /*
     Blocks:
-    Enthält ein enum welches die Block sorte als byte angibt. Enthält alle Models sowie Blöcke im Spiel.
-    Blöcke:
+    Enthï¿½lt ein enum welches die Block sorte als byte angibt. Enthï¿½lt alle Models sowie Blï¿½cke im Spiel.
+    Blï¿½cke:
         Air, Stone, Dirt, Grass, Debug
 */
