@@ -88,5 +88,5 @@ namespace ModelData {
 
 /*
   ModelData:
-  Enthällt wichtige Daten zum generieren des Mesh's.
+  Enthï¿½llt wichtige Daten zum generieren des Mesh's.
 */

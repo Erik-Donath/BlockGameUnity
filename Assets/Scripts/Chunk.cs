@@ -78,7 +78,7 @@ public class Chunk {
         );
     }
 
-    public bool IsSolid(Vector3Int pos, bool noWorld = false) { // noWorld ist um zu verhinder das es zum Loop kommt. Auch wenn das unmöglich sein sollte!
+    public bool IsSolid(Vector3Int pos, bool noWorld = false) { // noWorld ist um zu verhinder das es zum Loop kommt. Auch wenn das unmï¿½glich sein sollte!
         if(NotInChunkLocal(pos)) {
             if(noWorld) {
                 Debug.Log($"Failed to get solid on {pos} in {Coord}.");
@@ -101,5 +101,5 @@ public class Chunk {
 
 /*
  Chunk:
-    Diese Klasse beschreibt die Strukture und funktionalität eines Chunks.
+    Diese Klasse beschreibt die Strukture und funktionalitï¿½t eines Chunks.
 */
